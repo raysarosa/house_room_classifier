@@ -85,3 +85,12 @@ def find_and_remove_duplicates(dataset_path):
             os.remove(path)
 
     return duplicate_set, len(duplicate_set)
+
+
+def remove_noise(image_path, target_size=(224, 224)):
+    """Load and preprocess an image for the model."""
+    img = load_img(image_path, target_size=target_size)
+    img_array = img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array /= 255.0  # Normalize pixel values if needed
+    return img_array
