@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "house-room-classifier"
+version = "0.1.0"
+description = ""
+authors = ["Kida de Morais Aly <kidademoraisaly@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.2.3"
+matplotlib = "^3.9.3"
+scikit-learn = "^1.5.2"
+seaborn = "^0.13.2"
+jupyter = "^1.1.1"
+keras-tuner = "^1.4.7"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+
+[tool.poetry.scripts]
+train_model = "scripts.train_model:main"
+image_loading="scripts.data_exploring:main"
+visualize_predictions="scripts.visualize_predictions:main"
+evaluate_model="scripts.evaluate_model:main"
+bayesian_tunning="scripts.bayesian_tunning:main"
+grad_cam="scripts.grad_cam_results:main"
