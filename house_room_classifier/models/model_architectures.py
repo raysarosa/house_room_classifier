@@ -115,6 +115,7 @@ class ModelArchitectures:
         ])
         return model
     
+    @staticmethod
     def pretrained_resnet50_full_training(img_height, img_width, num_classes):
         """ResNet50 with training of all layers"""
         base_model = tf.keras.applications.ResNet50(
@@ -135,6 +136,7 @@ class ModelArchitectures:
         ])        
         return model
     
+    @staticmethod
     def pretrained_resnet50_full_training_v2(img_height, img_width, num_classes):
         """ResNet50 with training of all layers"""
         base_model = tf.keras.applications.ResNet50(
@@ -155,7 +157,29 @@ class ModelArchitectures:
         ])        
         return model
     
+    @staticmethod
     def pretrained_resnet50_full_training_v3(img_height, img_width, num_classes):
+        """ResNet50 with training of all layers"""
+        base_model = tf.keras.applications.ResNet50(
+            input_shape=(img_height, img_width, 3),
+            include_top=False,
+            weights='imagenet'
+        )
+        
+        # Make all layers trainable
+        base_model.trainable = True
+        
+        model = models.Sequential([
+            base_model,
+            layers.GlobalAveragePooling2D(),
+            layers.Dense(512, activation='relu'),
+            layers.Dropout(0.5),
+            layers.Dense(num_classes, activation='softmax')
+        ])        
+        return model
+    
+    @staticmethod
+    def pretrained_resnet50_full_training_v4(img_height, img_width, num_classes):
         """ResNet50 with training of all layers"""
         base_model = tf.keras.applications.ResNet50(
             input_shape=(img_height, img_width, 3),
@@ -237,16 +261,22 @@ class ModelArchitectures:
                 use_data_augmentation=True
             ),
             'pretrained_resnet50_full_training_v2': TrainingConfig(
-            epochs=19,
-            learning_rate=0.00001,
-            early_stopping_patience=3,
-            use_data_augmentation=True
+                epochs=19,
+                learning_rate=0.00001,
+                early_stopping_patience=3,
+                use_data_augmentation=True
             ),
             'pretrained_resnet50_full_training_v3': TrainingConfig(
-            epochs=100,
-            learning_rate=0.00001,
-            early_stopping_patience=5,
-            use_data_augmentation=True
+                epochs=100,
+                learning_rate=0.00001,
+                early_stopping_patience=5,
+                use_data_augmentation=True
+            ),
+            'pretrained_resnet50_full_training_v4': TrainingConfig(
+                epochs=100,
+                learning_rate=0.000001,
+                early_stopping_patience=10,
+                use_data_augmentation=True
             ),
             'custom_cnn_simple_v2': TrainingConfig(
                 epochs=25,
@@ -308,6 +338,13 @@ class ModelArchitectures:
                 tf.keras.layers.RandomTranslation(height_factor=0.1, width_factor=0.1)
             ]),
             'pretrained_resnet50_full_training_v3': tf.keras.Sequential([
+                tf.keras.layers.RandomFlip("horizontal_and_vertical"),
+                tf.keras.layers.RandomRotation(0.2),
+                tf.keras.layers.RandomZoom(0.1),
+                tf.keras.layers.RandomContrast(0.1),
+                tf.keras.layers.RandomTranslation(height_factor=0.1, width_factor=0.1)
+            ]),
+            'pretrained_resnet50_full_training_v4': tf.keras.Sequential([
                 tf.keras.layers.RandomFlip("horizontal_and_vertical"),
                 tf.keras.layers.RandomRotation(0.2),
                 tf.keras.layers.RandomZoom(0.1),
