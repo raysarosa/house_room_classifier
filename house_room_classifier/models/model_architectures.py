@@ -1,8 +1,12 @@
-from tensorflow.keras import models,layers
+from tensorflow.keras import models, layers
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 import tensorflow as tf
 from house_room_classifier.models.training_config import TrainingConfig
+from house_room_classifier.utils.seed_util import set_seed  # Import the seed utility
+
+# Apply the seed globally for reproducibility
+set_seed()
 
 class ModelArchitectures:
     @staticmethod
@@ -199,6 +203,7 @@ class ModelArchitectures:
         ])        
         return model
     
+    
     @staticmethod
     def custom_cnn_simple_v2(img_height, img_width, num_classes):
         """Basic custom CNN with minimal layers"""
@@ -219,6 +224,32 @@ class ModelArchitectures:
                     
                 ]
             )
+        return model
+    
+    @staticmethod
+    def pretrained_resnet101_full_training(img_height, img_width, num_classes):
+        """ResNet101 with training of all layers"""
+        set_seed()  # Ensure reproducibility within the method
+        
+        # Load the ResNet101 base model
+        base_model = tf.keras.applications.ResNet101(
+            input_shape=(img_height, img_width, 3),
+            include_top=False,
+            weights='imagenet'
+        )
+        
+        # Make all layers trainable
+        base_model.trainable = True
+        
+        # Create the full model
+        model = models.Sequential([
+            base_model,                           # Add the ResNet101 base
+            layers.GlobalAveragePooling2D(),     # Global pooling layer
+            layers.Dense(512, activation='relu'), # Fully connected layer
+            layers.Dropout(0.5),                 # Dropout for regularization
+            layers.Dense(num_classes, activation='softmax')  # Output layer
+        ])
+        
         return model
     
     @staticmethod
@@ -283,6 +314,12 @@ class ModelArchitectures:
                 learning_rate=0.0001,
                 early_stopping_patience=3,
                 use_data_augmentation=False
+            ),
+            'pretrained_resnet101_full_training': TrainingConfig(
+                epochs=20,
+                learning_rate=0.00001,
+                early_stopping_patience=5,
+                use_data_augmentation=True
             ),
         }
         return configs.get(archicteture, {}) 
@@ -357,6 +394,13 @@ class ModelArchitectures:
                 tf.keras.layers.RandomZoom(0.1),
                 tf.keras.layers.RandomContrast(0.1),
                 tf.keras.layers.RandomTranslation(height_factor=0.1, width_factor=0.1)
+            ]),
+            'pretrained_resnet101_full_training': tf.keras.Sequential([
+                tf.keras.layers.RandomFlip("horizontal_and_vertical", seed=42),
+                tf.keras.layers.RandomRotation(0.2, seed=42),
+                tf.keras.layers.RandomZoom(0.1, seed=42),
+                tf.keras.layers.RandomContrast(0.1, seed=42),
+                tf.keras.layers.RandomTranslation(height_factor=0.1, width_factor=0.1, seed=42)
             ]),
         }
         return augmentation_strategies.get(
