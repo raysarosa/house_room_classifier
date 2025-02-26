@@ -400,6 +400,7 @@ class ModelArchitectures:
                 tf.keras.layers.RandomRotation(0.2, seed=42),
                 tf.keras.layers.RandomZoom(0.1, seed=42),
                 tf.keras.layers.RandomContrast(0.1, seed=42),
+                tf.keras.layers.RandomBrightness(0.2, seed=42),
                 tf.keras.layers.RandomTranslation(height_factor=0.1, width_factor=0.1, seed=42)
             ]),
         }

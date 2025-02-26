@@ -7,38 +7,43 @@ from house_room_classifier.models.model_architectures import ModelArchitectures
 from house_room_classifier.data.preprocessing import apply_normalization,apply_augmentations
 
 class RoomClassificationModel:
-    def __init__(self, img_height=150,img_width=150, num_classes=5, architecture="custom_cnn_simple_1"):
-        self.img_height=img_height
-        self.img_width=img_width
-        self.num_classes=num_classes
-        self.model=None
-        self.architecture=architecture
-        self.model=None
-        self.training_config=None
-    
+    def __init__(self, img_height=150, img_width=150, num_classes=6, architecture="pretrained_resnet101_full_training"):
+        self.img_height = img_height
+        self.img_width = img_width
+        self.num_classes = num_classes
+        self.architecture = architecture
+        self.model = None
+        self.training_config = TrainingConfig()  # Load TrainingConfig
+
     def build_model(self):
-        # Dynamically select model architecture
+        """Builds and compiles the model based on the selected architecture"""
         model_func = getattr(ModelArchitectures, self.architecture, None)
         if model_func is None:
             raise ValueError(f"Architecture {self.architecture} not found")
-        
-        self.model = model_func(self.img_height, self.img_width, self.num_classes)
-        
-        self.training_config=ModelArchitectures.get_training_config(self.architecture)
 
-        lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=self.training_config.learning_rate,
-            decay_steps=self.training_config.learning_rate_decay_steps,
-            decay_rate=self.training_config.learning_rate_decay
-        )
-        optimizer=getattr(tf.keras.optimizers,
-                          self.training_config.optimizer.capitalize())(learning_rate=self.training_config.learning_rate)
-             
+        self.model = model_func(self.img_height, self.img_width, self.num_classes)
+
+        # Dynamically select optimizer
+        optimizer = self.get_optimizer()
+
+        # Compile the model
         self.model.compile(
             optimizer=optimizer,
             loss=self.training_config.loss,
             metrics=['accuracy']
         )
+
+        print(f"Model built and compiled with {self.training_config.optimizer.upper()}!")
+
+    def get_optimizer(self):
+        """Dynamically selects the optimizer based on TrainingConfig"""
+        if self.training_config.optimizer.lower() == "sgd":
+            return tf.keras.optimizers.SGD(
+                learning_rate=self.training_config.learning_rate,
+                momentum=self.training_config.momentum  # Using momentum
+            )
+        else:
+            return tf.keras.optimizers.Adam(learning_rate=self.training_config.learning_rate)
     
     @tf.autograph.experimental.do_not_convert
     def prepare_dataset(self, train_ds, val_ds, test_ds):
@@ -47,7 +52,8 @@ class RoomClassificationModel:
         normalization=tf.keras.layers.Rescaling(1./255)
 
         if self.training_config.use_data_augmentation:
-            train_ds = apply_augmentations(train_ds,augmentation_strategy)     
+            train_ds = apply_augmentations(train_ds,augmentation_strategy)
+     
         # Normalize datasets
         train_ds = apply_normalization(train_ds,normalization)
         val_ds = apply_normalization(val_ds,normalization)
