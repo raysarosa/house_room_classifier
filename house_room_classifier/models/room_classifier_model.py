@@ -5,6 +5,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from house_room_classifier.models.model_architectures import ModelArchitectures
 from house_room_classifier.data.preprocessing import apply_normalization,apply_augmentations
+from house_room_classifier.models.training_config import TrainingConfig
 
 class RoomClassificationModel:
     def __init__(self, img_height=150, img_width=150, num_classes=6, architecture="pretrained_resnet101_full_training"):
