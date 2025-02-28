@@ -18,4 +18,3 @@ class TrainingConfig:
         self.learning_rate_decay=learning_rate_decay
         self.learning_rate_decay_steps=learning_rate_decay_steps
         self.use_data_augmentation=use_data_augmentation
-        

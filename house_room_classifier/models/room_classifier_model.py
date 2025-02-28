@@ -7,7 +7,7 @@ from house_room_classifier.models.model_architectures import ModelArchitectures
 from house_room_classifier.data.preprocessing import apply_normalization,apply_augmentations
 
 class RoomClassificationModel:
-    def __init__(self, img_height=150,img_width=150, num_classes=6, architecture="custom_cnn_simple_1"):
+    def __init__(self, img_height=150,img_width=150, num_classes=5, architecture="custom_cnn_simple_1"):
         self.img_height=img_height
         self.img_width=img_width
         self.num_classes=num_classes
@@ -92,8 +92,3 @@ class RoomClassificationModel:
     
     def load_model(self, file_path="models/room_classifier_model.Keras"):
         self.model=models.load_model(file_path)
-
-
-
-
-        
