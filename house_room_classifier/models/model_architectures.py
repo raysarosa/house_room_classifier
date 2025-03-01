@@ -253,6 +253,32 @@ class ModelArchitectures:
         return model
     
     @staticmethod
+    def pretrained_resnet101_full_training_2(img_height, img_width, num_classes):
+        """ResNet101 with training of all layers"""
+        set_seed()  # Ensure reproducibility within the method
+        
+        # Load the ResNet101 base model
+        base_model = tf.keras.applications.ResNet101(
+            input_shape=(img_height, img_width, 3),
+            include_top=False,
+            weights='imagenet'
+        )
+        
+        # Make all layers trainable
+        base_model.trainable = True
+        
+        # Create the full model
+        model = models.Sequential([
+            base_model,                           # Add the ResNet101 base
+            layers.GlobalAveragePooling2D(),     # Global pooling layer
+            layers.Dense(512, activation='relu'), # Fully connected layer
+            layers.Dropout(0.5),                 # Dropout for regularization
+            layers.Dense(num_classes, activation='softmax')  # Output layer
+        ])
+        
+        return model
+    
+    @staticmethod
     def get_training_config(archicteture):
         configs={
             'custom_cnn_simple_v1': TrainingConfig(
@@ -317,6 +343,12 @@ class ModelArchitectures:
             ),
             'pretrained_resnet101_full_training': TrainingConfig(
                 epochs=20,
+                learning_rate=0.00001,
+                early_stopping_patience=5,
+                use_data_augmentation=True
+            ),
+            'pretrained_resnet101_full_training_2': TrainingConfig(
+                epochs=50,
                 learning_rate=0.00001,
                 early_stopping_patience=5,
                 use_data_augmentation=True
@@ -396,6 +428,14 @@ class ModelArchitectures:
                 tf.keras.layers.RandomTranslation(height_factor=0.1, width_factor=0.1)
             ]),
             'pretrained_resnet101_full_training': tf.keras.Sequential([
+                tf.keras.layers.RandomFlip("horizontal_and_vertical", seed=42),
+                tf.keras.layers.RandomRotation(0.2, seed=42),
+                tf.keras.layers.RandomZoom(0.1, seed=42),
+                tf.keras.layers.RandomContrast(0.1, seed=42),
+                tf.keras.layers.RandomBrightness(0.2, seed=42),
+                tf.keras.layers.RandomTranslation(height_factor=0.1, width_factor=0.1, seed=42)
+            ]),
+            'pretrained_resnet101_full_training_2': tf.keras.Sequential([
                 tf.keras.layers.RandomFlip("horizontal_and_vertical", seed=42),
                 tf.keras.layers.RandomRotation(0.2, seed=42),
                 tf.keras.layers.RandomZoom(0.1, seed=42),
